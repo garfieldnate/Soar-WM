@@ -1,65 +1,77 @@
-#modified from "Effective Perl Programming" by Joseph N. Hall, et al.
 use strict;
 use warnings;
 
-# ABSTRACT: DEFAULT MODULE TEMPLATE
+# ABSTRACT: Traverse Soar working memory dumps
 package Soar::WM;
+use Soar::WM::Slurp;
+use Carp;
+use base 'Exporter';
+use Data::Dumper;
+our @EXPORT = qw( get_root );
 
 our $VERSION = '.01';
 
-__PACKAGE__->new->_run unless caller;
+print  __PACKAGE__->get_wm_root($ARGV[0])->id unless caller;
 
-sub _run {
-  my ($application) = @_;
-  print { $application->{output_fh} }
-    $application->message;
-}
-
-sub new {
-  my ($class) = @_;
-  my $application = bless {}, $class;
-  $application->_init;
-  $application;
-}
-
-sub _init {
-  my ($application) = @_;
-  $application->{output_fh} = \*STDOUT;
-	$application->{input_fh} = \*STDIN;
-}
-
-sub output_fh {
-	my ( $application, $fh ) = @_;
-	if ($fh) {
-		if(ref($fh) eq 'GLOB'){
-			$application->{output_fh} = $fh;
-		}
-		else{
-			open my $fh2, '>', $fh or die "Couldn't open $fh";
-			$application->{output_fh} = $fh2;
-		}
-	}
-	$application->{output_fh};
-}
-
-sub input_fh {
-	my ( $application, $fh ) = @_;
-	if ($fh) {
-		if(ref($fh) eq 'GLOB'){
-			$application->{input_fh} = $fh;
-		}
-		else{
-			open my $fh2, '<', $fh or die "Couldn't open $fh";
-			$application->{input_fh} = $fh2;
-		}
-	}
-	$application->{input_fh};
-}
-
-sub message {
-  "Your work starts here\n";
+#return a Soar::WM::Element object for the root
+sub get_wm_root {
+	my ($class, $file) = @_;
+	croak 'missing file name argument'
+		unless $file;
+	
+	my ($wme_hash, $root_name) = read_wm_file($file);
+	
+	my $wm = bless $wme_hash, $class;
+	return Soar::WM::Element->new($wm, $root_name);
 }
 
 1;
 
+=pod
+=head1 NAME
+
+Soar::WM - Perl extension for representing Soar working memory given a WME dump file
+
+=head1 SYNOPSIS
+
+  use Soar::WM;
+
+=head1 DESCRIPTION
+
+
+=head METHODS
+
+=head2 C<get_root>
+This function is automatically exported into the using module's namespace.
+
+
+=cut
+
+package Soar::WM::Element;
+
+sub new {
+	my ($class, $wm, $id) = @_;
+	my $self = bless {
+		wm => $wm, 
+		id => $id
+	}, $class;
+	return $self;
+}
+
+# sub first_child {
+	# my ($self, $name) = @_;
+# }
+
+# sub children {
+	# my ($self, $name) = @_;
+# }
+
+# sub value {
+	# my ($self) = @_;
 	
+# }
+
+sub id {
+	my ($self) = @_;
+	return $self->{id};
+}

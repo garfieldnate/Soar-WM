@@ -7,16 +7,20 @@ use Autodie;
 use Carp;
 
 use base qw(Exporter);
-our @EXPORT = qw(read_wm);
+our @EXPORT = qw(read_wm_file);
 
-#structure will be: 
-# return_val->{$wme} = { #wmeval=>$wme, $attr=>@values}
-# {'root_wme'} = 'S1' or some such
 
 our $VERSION = '0.01';
 
 say Dump read_wm(file => $ARGV[0]) unless caller;
 
+sub read_wm_file {
+	return read_wm(file=>shift());
+}
+
+#structure will be: 
+# return_val->{$wme} = { #wmeval=>$wme, $attr=>[@values]}
+# {'root_wme'} = 'S1' or some such
 #parse a WME dump file and create a WM object; return the WM hash and the name of the root WME.
 sub read_wm {
 	my %args = (
@@ -129,10 +133,15 @@ Soar::WM::Slurp - Perl extension for slurping Soar WME dump files.
   print Dumper($WM_hash);
 
 =head1 DESCRIPTION
+This module can be used to read in a Soar WME dump file. It exports one function, read_wm, which reads a WME dump and returns a hash pointer representing it.
  
 =head METHODS
 
+=head2 C<read_wm_file>
+A shortcut for C<read_wm( file=>$arg )>
+
 =head2 C<read_wm>
+This function is automatically exported into the using module's namespace.
 Takes a named argument, either file => 'path/to/file', file => $fileGlob, or text => 'WME dump here'.
 Returns a pointer to a hash structure representing the input WME dump, and the name of the root WME, in a list like this: ($hash, $root).
 
