@@ -6,7 +6,7 @@ use Test::More tests => 6 + 1; #+ 1 for NoWarnings auto-test
 use Test::NoWarnings;
 use Test::Deep;
 
-use Soar::WM::Slurp;
+use Soar::WM::Slurp qw(read_wm);
 use FindBin('$Bin');
 use File::Spec;
 use Data::Section::Simple qw(get_data_section);
@@ -37,13 +37,11 @@ __DATA__
 @@ small_eval
 {
 	S1 => {
-		'#wmeval' => 'S1',
 		foo => ['bar'],
 		baz => ['boo'],
 		link => ['S2'],
 	},
 	S2 => {
-		'#wmeval' => 'S2',
 		faz => ['far'],
 		boo => ['baz'],
 		fuzz => ['buzz'],
@@ -63,7 +61,7 @@ __DATA__
 @@ incomplete eval
 {
 	S1 => {
-		'#wmeval' => 'S1',
+		#'#wmeval' => 'S1',
 		foo => ['bar'],
 		baz => ['boo'],
 		link => ['S2'],

@@ -3,14 +3,15 @@ package Soar::WM::Slurp;
 use strict;
 use warnings;
 use 5.010;
-use Autodie;
+use autodie;
 use Carp;
 
 use base qw(Exporter);
 our @EXPORT = qw(read_wm_file);
+our @EXPORT_OK = qw(read_wm);
 
-
-our $VERSION = '0.01';
+# VERSION
+# ABSTRACT: Read and parse Soar working memory dumps
 
 say Dump read_wm(file => $ARGV[0]) unless caller;
 
@@ -19,7 +20,7 @@ sub read_wm_file {
 }
 
 #structure will be: 
-# return_val->{$wme} = { #wmeval=>$wme, $attr=>[@values]}
+# return_val->{$wme} = { $attr=>[@values]}
 # {'root_wme'} = 'S1' or some such
 #parse a WME dump file and create a WM object; return the WM hash and the name of the root WME.
 sub read_wm {
@@ -35,7 +36,7 @@ sub read_wm {
 		$fh = _get_fh($args{file});
 	}else{
 		$fh = \*STDIN;
-		carp 'Reading WME dump from standard in.';
+		print "Reading WME dump from standard in.\n";
 	}
 	
 	#control variables
@@ -91,9 +92,9 @@ sub read_wm {
 				push @{$rec->{"$attr"}}, $val;
 			}
 
-			#strip opening parenthesis and store WME id
+			#strip opening parenthesis
 			$wme =~ s/^\(//;
-			$rec->{'#wmeval'} = $wme;
+			# $rec->{'#wmeval'} = $wme;
 
 			#rootwme is S1, or similar
 			$root_wme = $wme unless $root_wme;
