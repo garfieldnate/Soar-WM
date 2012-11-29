@@ -1,75 +1,84 @@
 package Soar::WM::Element;
 use strict;
 use warnings;
+
 # VERSION
 # ABSTRACT: Work with Soar working memory elements
 
 use Carp;
 
 sub new {
-	my ($class, $wm, $id) = @_;
-	croak 'Given ID doesn\'t exist in given working memory'
-		unless exists $wm->{$id};
-		
-	my $self = bless {
-		wm => $wm,
-		id => $id,
-		node => $wm->{$id},
-	}, $class;
-	return $self;
+    my ( $class, $wm, $id ) = @_;
+    if(!exists $wm->{$id}){
+	    carp 'Given ID doesn\'t exist in given working memory';
+	    return undef;
+	}
+
+    my $self = bless {
+        wm   => $wm,
+        id   => $id,
+        node => $wm->{$id},
+    }, $class;
+    return $self;
 }
 
 sub id {
-	my ($self) = @_;
-	return $self->{id};
+    my ($self) = @_;
+    return $self->{id};
 }
 
 sub atts {
-	my ($self) = @_;
-	my @atts = keys %{$self->{node}};
-	return \@atts;
+    my ($self) = @_;
+    my @atts = keys %{ $self->{node} };
+    return \@atts;
 }
 
 sub vals {
-	my ($self, $query) = @_;
-	carp 'missing argument attribute name'
-		unless $query;
-	
-	my @values = @{ $self->{node}->{$query} };
-	#find ones that are links and change them into WME instances
-	for (0..$#values){
-		if( exists $self->{wm}->{$values[$_]} ) {
-			$values[$_] = __PACKAGE__->new($self->{wm}, $values[$_]);
-		}
-	}
-	return \@values;
+    my ( $self, $query ) = @_;
+	if(!$query){
+        carp 'missing argument attribute name';
+		return undef;
+    }
+    my @values = @{ $self->{node}->{$query} };
+
+    #find ones that are links and change them into WME instances
+    for ( 0 .. $#values ) {
+        if ( exists $self->{wm}->{ $values[$_] } ) {
+            $values[$_] = __PACKAGE__->new( $self->{wm}, $values[$_] );
+        }
+    }
+    return \@values;
 }
 
 sub first_val {
-	my ($self, $query) = @_;
-	carp 'missing argument attribute name'
-		unless $query;
-	# grab only the first value
-	my $value = ${ $self->{node}->{$query} }[0];
-	
-	#if value is a link, change it into a WME instance
-	if( exists $self->{wm}->{$value} ) {
-		$value = __PACKAGE__->new($self->{wm}, $value);
-	}
-	return $value;
+    my ( $self, $query ) = @_;
+	if(!$query){
+        carp 'missing argument attribute name';
+		return undef;
+    }
+
+    # grab only the first value
+    my $value = ${ $self->{node}->{$query} }[0];
+
+    #if value is a link, change it into a WME instance
+    if ( exists $self->{wm}->{$value} ) {
+        $value = __PACKAGE__->new( $self->{wm}, $value );
+    }
+    return $value;
 }
 
 sub num_links {
-	my ($self) = @_;
-	my $count = 0;
-	#iterate values of each attribute; a child will have its own entry in WM
-	for my $att(@{$self->atts}){
-		for my $val(@{ $self->{node}->{$att} }){
-			$count++ 
-				if(exists $self->{wm}->{$val});
-		}
-	}
-	return $count;
+    my ($self) = @_;
+    my $count = 0;
+
+    #iterate values of each attribute; a child will have its own entry in WM
+    for my $att ( @{ $self->atts } ) {
+        for my $val ( @{ $self->{node}->{$att} } ) {
+            $count++
+              if ( exists $self->{wm}->{$val} );
+        }
+    }
+    return $count;
 }
 
 1;

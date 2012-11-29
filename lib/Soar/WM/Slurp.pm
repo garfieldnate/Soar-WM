@@ -12,111 +12,120 @@ our @EXPORT_OK = qw(read_wm_file read_wm);
 # VERSION
 # ABSTRACT: Read and parse Soar working memory dumps
 
-say Dump read_wm(file => $ARGV[0]) unless caller;
+say Dump read_wm( file => $ARGV[0] ) unless caller;
 
 sub read_wm_file {
-	my ($file) = @+;
-	return read_wm(file=>$file);
+    my ($file) = @_;
+    return read_wm( file => $file );
 }
 
-#structure will be: 
+#structure will be:
 # return_val->{$wme} = { $attr=>[@values]}
 # {'root_wme'} = 'S1' or some such
 #parse a WME dump file and create a WM object; return the WM hash and the name of the root WME.
-sub read_wm {## no critic (RequireArgUnpacking)
-	my %args = (
-		text	=> undef,
-		file	=> undef,
-		@_
-	);
-	my $fh;
-	if($args{text}){
-		$fh = _get_fh_from_string($args{text});
-	}elsif($args{file}){
-		$fh = _get_fh($args{file});
-	}else{
-		$fh = \*STDIN;
-		print "Reading WME dump from standard in.\n";
-	}
-	
-	#control variables
-	my ($hasOpenParen,$hasCloseParen);
-	
-	#keep track of results/return value
-	my ($root_wme, %wme_hash);
-	while (my $inline = <$fh>){
-		chomp $inline;
-		next if $inline eq '';
-		my $line = "";
-		$hasOpenParen = ($inline =~ /^\s*\(/);
-		$hasCloseParen = ($inline =~ /\)\s*$/);
+sub read_wm {    ## no critic (RequireArgUnpacking)
+    my %args = (
+        text => undef,
+        file => undef,
+        @_
+    );
+    my $fh;
+    if ( $args{text} ) {
+        $fh = _get_fh_from_string( $args{text} );
+    }
+    elsif ( $args{file} ) {
+        $fh = _get_fh( $args{file} );
+    }
+    else {
+        $fh = \*STDIN;
+        print "Reading WME dump from standard in.\n";
+    }
 
-		#read entire space between parentheses
-		while ($hasOpenParen && !($hasCloseParen))
-		{
-			chomp $inline;
-			$line .= $inline;
-			$inline = <$fh>;
-			#if this line of the WME dump is incomplete, ignore it.
-			if(!$inline){
-				$inline = '';
-				$line = '';
-				last;
-			}
-			$hasCloseParen = ($inline =~ /\)\s*$/);
-		}
-		$line .= $inline;
-		if($line){
-			#separate wme and everything else [(<wme> ^the rest...)]
-			my ($wme, $rest) = split " ", $line, 2;
+    #control variables
+    my ( $hasOpenParen, $hasCloseParen );
 
-			# initiate the record
-			my $rec = {};
+    #keep track of results/return value
+    my ( $root_wme, %wme_hash );
+    while ( my $inline = <$fh> ) {
+        chomp $inline;
+        next if $inline eq '';
+        my $line = "";
+		
+		#note: do we need $hasOpenParen?
+        $hasOpenParen  = ( $inline =~ /^\s*\(/ );
+        $hasCloseParen = ( $inline =~ /\)\s*$/ );
 
-			# hash each of the attr/val pairs
-			my @attvals = split /\^/, $rest;
-			shift @attvals;#get rid of the entry, which is just an empty string.
-			foreach my $thiss (@attvals)
-			{
-				my ($attr, $val) = split " ", $thiss;
-				if (!length($attr))
-				{
-					next;
-				}
-				
-				#get rid of final parenthesis
-				$val =~ s/\)$//;
-				
-				# store attr/val association in the record
-				push @{$rec->{"$attr"}}, $val;
-			}
+        #read entire space between parentheses
+        while ( $hasOpenParen && !($hasCloseParen) ) {
+            chomp $inline;
+            $line .= $inline;
+            $inline = <$fh>;
 
-			#strip opening parenthesis
-			$wme =~ s/^\(//;
-			# $rec->{'#wmeval'} = $wme;
+            #if this line of the WME dump is incomplete, ignore it.
+            if ( !$inline ) {
+                $inline = '';
+                $line   = '';
+                last;
+            }
+            $hasCloseParen = ( $inline =~ /\)\s*$/ );
+        }
+        $line .= $inline;
+        if ($line) {
 
-			#rootwme is S1, or similar
-			$root_wme = $wme unless $root_wme;
+            #separate wme and everything else [(<wme> ^the rest...)]
+            my ( $wme, $rest ) = split " ", $line, 2;
+
+            # initiate the record
+            my $rec = {};
+
+            # hash each of the attr/val pairs
+            my @attVals = split /\^/, $rest;
+			#if line were 'S16 ^foo bar ^baz biff', then @attvals
+			#now contains ['S16', 'foo bar', 'baz biff']
 			
-			# add the record to the wme hash
-			$wme_hash{$wme} = $rec;
-		}
-	}
-	close $fh;
-	return \%wme_hash, $root_wme;
+			#get rid of the WME ID
+            shift @attVals;    
+			
+            foreach my $attVal (@attVals) {
+                my ( $attr, $val ) = split " ", $attVal;
+                if ( !length($attr) ) {#note: would this ever happen?
+                    next;
+                }
+
+                #get rid of final parenthesis
+                $val =~ s/\)$//;
+
+                # store attr/val association in the record
+                push @{ $rec->{"$attr"} }, $val;
+            }
+
+            #strip opening parenthesis
+            $wme =~ s/^\(//;
+
+            # $rec->{'#wmeval'} = $wme;
+
+            #rootwme is S1, or similar
+            $root_wme = $wme unless $root_wme;
+
+            # add the record to the wme hash
+            $wme_hash{$wme} = $rec;
+        }
+    }
+    close $fh;
+    return \%wme_hash, $root_wme;
 }
 
-sub _get_fh_from_string{
-	my ($text) = @_;
-	open my $sh, '<', \$text;
-	return $sh;
+sub _get_fh_from_string {
+    my ($text) = @_;
+    open my $sh, '<', \$text;
+    return $sh;
 }
 
-sub _get_fh{
-	my ($name) = @_;
-	return $name if ref $name eq 'GLOB';
-	open my $fh, '<', $name;
-	return $fh;
+sub _get_fh {
+    my ($name) = @_;
+    return $name if ref $name eq 'GLOB';
+    open my $fh, '<', $name;
+    return $fh;
 }
 
 1;

@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 9 + 1; #+ 1 for NoWarnings auto-test
+use Test::More tests => 11 + 1; #+ 1 for NoWarnings auto-test
 use Test::NoWarnings;
 use Test::Deep;
 
@@ -31,9 +31,14 @@ is($root->num_links, 2, 'Root should have two WME links');
 my @atts = @{ $root->atts() };
 is(@atts, 3, 'Three attributes found');
 
-my @vals = @{ $root->vals('link') };
-is(@vals, 2, 'Two values for link');
-# print Dumper \@vals;
+my @links = @{ $root->vals('link') };
+is(@links, 2, 'Two values for link');
+
+my @foos = @{$root->vals('foo')};
+is(@links, 2, 'Two values for foo');
+my $foo = $root->first_val('foo');
+is($foo, 'bar', 'First value of \'foo\' is \'bar\'');
+
 
 my $val = $root->first_val('link');
 isa_ok($val, $class);
