@@ -50,8 +50,8 @@ sub read_wm {    ## no critic (RequireArgUnpacking)
         chomp $inline;
         next if $inline eq '';
         my $line = "";
-		
-		#note: do we need $hasOpenParen?
+
+        #note: do we need $hasOpenParen?
         $hasOpenParen  = ( $inline =~ /^\s*\(/ );
         $hasCloseParen = ( $inline =~ /\)\s*$/ );
 
@@ -80,15 +80,16 @@ sub read_wm {    ## no critic (RequireArgUnpacking)
 
             # hash each of the attr/val pairs
             my @attVals = split /\^/, $rest;
-			#if line were 'S16 ^foo bar ^baz biff', then @attvals
-			#now contains ['S16', 'foo bar', 'baz biff']
-			
-			#get rid of the WME ID
-            shift @attVals;    
-			
+
+            #if line were 'S16 ^foo bar ^baz biff', then @attvals
+            #now contains ['S16', 'foo bar', 'baz biff']
+
+            #get rid of the WME ID
+            shift @attVals;
+
             foreach my $attVal (@attVals) {
                 my ( $attr, $val ) = split " ", $attVal;
-                if ( !length($attr) ) {#note: would this ever happen?
+                if ( !length($attr) ) {    #note: would this ever happen?
                     next;
                 }
 

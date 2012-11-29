@@ -9,10 +9,10 @@ use Carp;
 
 sub new {
     my ( $class, $wm, $id ) = @_;
-    if(!exists $wm->{$id}){
-	    carp 'Given ID doesn\'t exist in given working memory';
-	    return undef;
-	}
+    if ( !exists $wm->{$id} ) {
+        carp 'Given ID doesn\'t exist in given working memory';
+        return;
+    }
 
     my $self = bless {
         wm   => $wm,
@@ -35,9 +35,9 @@ sub atts {
 
 sub vals {
     my ( $self, $query ) = @_;
-	if(!$query){
+    if ( !$query ) {
         carp 'missing argument attribute name';
-		return undef;
+        return;
     }
     my @values = @{ $self->{node}->{$query} };
 
@@ -52,9 +52,9 @@ sub vals {
 
 sub first_val {
     my ( $self, $query ) = @_;
-	if(!$query){
+    if ( !$query ) {
         carp 'missing argument attribute name';
-		return undef;
+        return;
     }
 
     # grab only the first value

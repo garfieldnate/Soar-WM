@@ -17,10 +17,10 @@ print 'root is ' . __PACKAGE__->wm_root_from_file( $ARGV[0] )->id unless caller;
 #return a Soar::WM::Element object for the root
 sub wm_root_from_file {
     my ($file) = @_;
-    if(!$file){
-	    carp 'missing file name argument';
-		return undef;
-	}
+    if ( !$file ) {
+        carp 'missing file name argument';
+        return;
+    }
 
     return wm_root( file => $file );
 
