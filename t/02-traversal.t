@@ -31,7 +31,7 @@ is($root->num_links, 2, 'Root should have two WME links');
 my @atts = @{ $root->atts() };
 is(@atts, 3, 'Three attributes found');
 
-my @vals = @{ $root->values('link') };
+my @vals = @{ $root->vals('link') };
 is(@vals, 2, 'Two values for link');
 # print Dumper \@vals;
 

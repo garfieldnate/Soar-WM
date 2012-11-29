@@ -7,8 +7,7 @@ use autodie;
 use Carp;
 
 use base qw(Exporter);
-our @EXPORT = qw(read_wm_file);
-our @EXPORT_OK = qw(read_wm);
+our @EXPORT_OK = qw(read_wm_file read_wm);
 
 # VERSION
 # ABSTRACT: Read and parse Soar working memory dumps
@@ -16,14 +15,15 @@ our @EXPORT_OK = qw(read_wm);
 say Dump read_wm(file => $ARGV[0]) unless caller;
 
 sub read_wm_file {
-	return read_wm(file=>shift());
+	my ($file) = @+;
+	return read_wm(file=>$file);
 }
 
 #structure will be: 
 # return_val->{$wme} = { $attr=>[@values]}
 # {'root_wme'} = 'S1' or some such
 #parse a WME dump file and create a WM object; return the WM hash and the name of the root WME.
-sub read_wm {
+sub read_wm {## no critic (RequireArgUnpacking)
 	my %args = (
 		text	=> undef,
 		file	=> undef,
@@ -40,15 +40,14 @@ sub read_wm {
 	}
 	
 	#control variables
-	my ($hasOpenParen,$hasCloseParen,$line,$wme,
-		$rest,$rec,@attvals,$thiss,$attr,$val,);
+	my ($hasOpenParen,$hasCloseParen);
 	
 	#keep track of results/return value
 	my ($root_wme, %wme_hash);
 	while (my $inline = <$fh>){
 		chomp $inline;
 		next if $inline eq '';
-		$line = "";
+		my $line = "";
 		$hasOpenParen = ($inline =~ /^\s*\(/);
 		$hasCloseParen = ($inline =~ /\)\s*$/);
 
@@ -69,17 +68,17 @@ sub read_wm {
 		$line .= $inline;
 		if($line){
 			#separate wme and everything else [(<wme> ^the rest...)]
-			($wme, $rest) = split " ", $line, 2;
+			my ($wme, $rest) = split " ", $line, 2;
 
 			# initiate the record
-			$rec = {};
+			my $rec = {};
 
 			# hash each of the attr/val pairs
-			@attvals = split /\^/, $rest;
+			my @attvals = split /\^/, $rest;
 			shift @attvals;#get rid of the entry, which is just an empty string.
-			foreach $thiss (@attvals)
+			foreach my $thiss (@attvals)
 			{
-				($attr, $val) = split " ", $thiss;
+				my ($attr, $val) = split " ", $thiss;
 				if (!length($attr))
 				{
 					next;
@@ -108,17 +107,19 @@ sub read_wm {
 }
 
 sub _get_fh_from_string{
-	my $text = shift;
+	my ($text) = @_;
 	open my $sh, '<', \$text;
 	return $sh;
 }
 
 sub _get_fh{
-	my ($name) = shift;
+	my ($name) = @_;
 	return $name if ref $name eq 'GLOB';
 	open my $fh, '<', $name;
 	return $fh;
 }
+
+1;
 
 __END__
 =head1 NAME
@@ -127,7 +128,7 @@ Soar::WM::Slurp - Perl extension for slurping Soar WME dump files.
 
 =head1 SYNOPSIS
 
-  use Soar::WM::Slurp;
+  use Soar::WM::Slurp qw(read_wm);
   use Data::Dumper;
   my ($WM_hash, $root_name) = read_wm(file => 'path/to/wme/dump/file');
   print 'root is ' . $root_name;
@@ -136,13 +137,12 @@ Soar::WM::Slurp - Perl extension for slurping Soar WME dump files.
 =head1 DESCRIPTION
 This module can be used to read in a Soar WME dump file. It exports one function, read_wm, which reads a WME dump and returns a hash pointer representing it.
  
-=head METHODS
+=head1 METHODS
 
 =head2 C<read_wm_file>
 A shortcut for C<read_wm( file=>$arg )>
 
 =head2 C<read_wm>
-This function is automatically exported into the using module's namespace.
 Takes a named argument, either file => 'path/to/file', file => $fileGlob, or text => 'WME dump here'.
 Returns a pointer to a hash structure representing the input WME dump, and the name of the root WME, in a list like this: ($hash, $root).
 

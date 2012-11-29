@@ -30,7 +30,7 @@ sub atts {
 	return \@atts;
 }
 
-sub values {
+sub vals {
 	my ($self, $query) = @_;
 	carp 'missing argument attribute name'
 		unless $query;
@@ -82,24 +82,24 @@ Soar::WM::Element - Perl extension for representing Soar working memory elements
 
 =head1 SYNOPSIS
 
-  use Soar::WM qw(wm_root);
-  my $root = wm_root(<<ENDWM);
-  (S1 ^foo bar ^foo buzz ^baz boo ^link S2 ^link S3)
-  (S2 ^faz far 
-	^boo baz
-	^fuzz buzz)
-  (S3 ^junk foo)
-  <<ENDWM
-  print $root->id; # 'S1'
-  my $val = $root->first_val('link');
-  print $val->id; # 'S2'
+ use Soar::WM qw(wm_root);
+ my $root = wm_root(<<ENDWM);
+ (S1 ^foo bar ^foo buzz ^baz boo ^link S2 ^link S3)
+ (S2 ^faz far 
+    ^boo baz
+    ^fuzz buzz)
+ (S3 ^junk foo)
+ ENDWM
+ print $root->id; # 'S1'
+ my $val = $root->first_val('link');
+ print $val->id; # 'S2'
  print $val->first_val('faz'); # 'far'
 
 =head1 DESCRIPTION
 
 This module allows one to traverse working memory by accessing attributes and values of a single element at a time.
 
-=head METHODS
+=head1 METHODS
 
 =head2 C<new>
 
@@ -116,7 +116,7 @@ Returns the WME ID of the this element ('S1', 'W3', etc.)
 
 Returns an array pointer containing the attributes present in this element.
 
-=head2 C<values>
+=head2 C<vals>
 
 Takes one required argument, an attribute name, and returns an array pointer containing all of the values of the given attribute
 for this element. Any values that are names of other working memory elements will be blessed as new Soar::WM::Elements.
@@ -126,7 +126,7 @@ for this element. Any values that are names of other working memory elements wil
 Takes one required argument, an attribute name, and returns the first value of the given attribute for this element. 
 If the values is the names of another working memory element, it will be blessed as a new Soar::WM::Element.
 
-=head2 C<num_link_atts>
+=head2 C<num_links>
 
 Returns the number of values in all of this element's attributes which are names of other existing working memory elements.
 
