@@ -1,4 +1,6 @@
 Revision history for Soar-WM
 
 {{$NEXT}}
+
+0.02      2012-12-01 00:23:58 UTC
 	First release. Uses code written by Deryle Lonsdale to slurp a WME dump.
