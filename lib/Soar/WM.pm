@@ -99,12 +99,6 @@ It takes a named argument, file or text. Using C<wm_root(file=>path)> or C<wm_ro
 Using C<wm_root(text=>'(S1 ^foo bar)')>, you can create an object using a given WME dump text. 
 If neither argument is specified, this function will wait for input from standard in.
 
-=head2 TO DO
-
-Currently there is no separate constructor for a Soar::WM object; instead, the only existing functions return the root of a Soar::WM object,
-which is an instance of L<Soar::WM::Element>. Besides a separate constructor, one might find it useful to be able to grab any element of a Soar::WM
-object given its ID. I have not found this expedient, and so have not coded. If you really want it, just shoot me an email.
-
 =head1 SEE ALSO
 
 The homepage for the Soar cognitive architecture is here: L<http://sitemaker.umich.edu/soar/home>.
