@@ -63,6 +63,11 @@ Soar::WM - Perl extension for representing Soar working memory given a WME dump 
   use Soar::WM qw(wm_root_from_file);
   my $root = wm_root_from_file('/path/to/wme/dump');
   print $root->id; #probably prints S1
+  
+  #or
+  my $wm = Soar::WM->new(text => '(S1 ^foo bar)
+  (S2 ^boo far)');
+  my $wme = $wm->get_wme('s2');
 
 =head1 DESCRIPTION
 
