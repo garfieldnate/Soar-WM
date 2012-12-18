@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 11 + 1;    #+ 1 for NoWarnings auto-test
+use Test::More tests => 13 + 1;    #+ 1 for NoWarnings auto-test
 use Test::NoWarnings;
 use Test::Deep;
 
@@ -26,6 +26,9 @@ my $wmText = $allData->{'small text'};
 $root = wm_root( text => $wmText );
 isa_ok( $root, $class );
 is( $root->id, 'S1', 'Root identified correctly from text' );
+
+is(scalar @{ $root->children('links_only' => 1) }, 2, 'link children only');
+is(scalar @{ $root->children() }, 5, 'link children only');
 
 is( $root->num_links, 2, 'Root should have two WME links' );
 my @atts = @{ $root->atts() };
