@@ -39,6 +39,7 @@ sub vals {
         carp 'missing argument attribute name';
         return;
     }
+	return [] unless exists $self->{node}->{$query};
     my @values = @{ $self->{node}->{$query} };
 	
     #find ones that are links and change them into WME instances
@@ -80,6 +81,7 @@ sub first_val {
         carp 'missing argument attribute name';
         return;
     }
+	return unless exists $self->{node}->{$query};
 
     # grab only the first value
     my $value = ${ $self->{node}->{$query} }[0];
